@@ -4214,6 +4214,9 @@ end
 
 function widget:MapDrawCmd(playerID, cmdType, x, y, z, a, b, c)
 	if cmdType == "point" then
+		if WG.isIgnoredPlayer and WG.isIgnoredPlayer(playerID) then
+			return
+		end
 		lastMapmarkCoords = { x, y, z }
 	end
 end

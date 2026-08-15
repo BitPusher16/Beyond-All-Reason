@@ -348,6 +348,10 @@ function widget:DrawScreen()
 end
 
 function widget:MapDrawCmd(playerID, cmdType, px, py, pz, label)
+	if WG.isIgnoredPlayer and WG.isIgnoredPlayer(playerID) then
+		return
+	end
+
 	local spectator, fullView = GetSpectatingState()
 	local _, _, _, playerTeam = GetPlayerInfo(playerID, false)
 	if

@@ -6,7 +6,7 @@ function widget:GetInfo()
 		desc = "List of players and spectators",
 		author = "Marmoth. (spiced up by Floris)",
 		date = "2008",
-		version = 46,
+		version = 47,
 		license = "GNU GPL, v2 or later",
 		layer = -4,
 		enabled = true,
@@ -74,6 +74,7 @@ local spGetPlayerInfo = Spring.GetPlayerInfo
 	v44   (Floris): added rendertotexture draw method
 	v45   (Floris): support PvE team ranking leaderboard style
 	v46   (Floris): support alternative (historic) playernames based on accountID's
+	v47   : hide map ping/draw indicators for ignored players
 ]]
 --
 
@@ -5025,6 +5026,10 @@ function widget:ViewResize()
 end
 
 function widget:MapDrawCmd(playerID, cmdType, px, py, pz)
+	if WG.isIgnoredPlayer and WG.isIgnoredPlayer(playerID) then
+		return
+	end
+
 	-- get the points drawn (to display point indicator)
 	if m_point.active then
 		if cmdType == "point" then

@@ -23251,6 +23251,9 @@ function widget:MapDrawCmd(playerID, cmdType, mx, my, mz, a, b, c)
 	if uiState.inMinMode then
 		return
 	end
+	if WG.isIgnoredPlayer and WG.isIgnoredPlayer(playerID) then
+		return
+	end
 
 	-- Store point markers for rendering (from any player, but not spectators)
 	if cmdType == "point" then

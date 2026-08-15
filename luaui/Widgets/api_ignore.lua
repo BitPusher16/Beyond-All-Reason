@@ -125,6 +125,30 @@ local function toggleignoreCmd(_, _, params)
 	end
 end
 
+-- accountid lives in playerOpts (11th return). GetPlayerInfo(playerID, false)
+-- returns nil for that table, so ignored draws would never be consumed.
+local function isPlayerIgnored(playerID)
+	if not playerID then
+		return false
+	end
+
+	local name, _, _, _, _, _, _, _, _, _, playerOpts = Spring.GetPlayerInfo(playerID)
+	local accountID = playerOpts and tonumber(playerOpts.accountid) or nil
+	if accountID and (ignoredAccounts[accountID] or ignoredAccountsAndNames[accountID]) then
+		return true
+	end
+	if name and name ~= "" and ignoredAccountsAndNames[name] then
+		return true
+	end
+
+	local aliasName = WG.playernames and WG.playernames.getPlayername and WG.playernames.getPlayername(playerID)
+	if aliasName and aliasName ~= "" and ignoredAccountsAndNames[aliasName] then
+		return true
+	end
+
+	return false
+end
+
 function widget:Initialize()
 	-- add all other ignored account names that arent in the current game but might be in the lobby
 	for accountID, name in pairs(ignoredAccounts) do
@@ -136,12 +160,14 @@ function widget:Initialize()
 	end
 	processPlayerlist()
 	WG.ignoredAccounts = ignoredAccountsAndNames
+	WG.isIgnoredPlayer = isPlayerIgnored
 	widgetHandler:AddAction("toggleignore", toggleignoreCmd, nil, "t")
 end
 
 function widget:Shutdown()
 	widgetHandler:RemoveAction("toggleignore")
 	WG.ignoredAccounts = nil
+	WG.isIgnoredPlayer = nil
 end
 
 function widget:PlayerChanged()
@@ -149,9 +175,7 @@ function widget:PlayerChanged()
 end
 
 function widget:MapDrawCmd(playerID, cmdType, startx, starty, startz, a, b, c)
-	local _, _, _, _, _, _, _, _, _, _, playerInfo = Spring.GetPlayerInfo(playerID, false)
-	local accountID = (playerInfo and playerInfo.accountid) and tonumber(playerInfo.accountid) or nil
-	if accountID and ignoredAccounts[accountID] then
+	if isPlayerIgnored(playerID) then
 		return true
 	end
 	return nil
